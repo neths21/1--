@@ -21,9 +21,7 @@ while len(l)<50:
     print(answer_State)
     print(df["state"].values)
     if answer_State=="Exit":
-        for i in df["state"].values:
-              if i not in l:
-                   m.append(i)
+        m= [i for i in df["state"].values if i not in l]
         datalearn=pandas.DataFrame(m)
         datalearn.to_csv(r"D:\code\python\100 days of python\day25\states_to_learn.csv",index=False)
         break
