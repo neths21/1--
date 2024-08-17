@@ -2,6 +2,9 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
+def searchfunc():
+    pass
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generatepass():
     letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -35,21 +38,51 @@ def save():
     webdata=website.get()
     emaildata=email.get()
     passworddata=password.get()
-    if webdata=="" or passworddata=="":
-        messagebox.showinfo(title="Oops",message="Make sure you've entered the details")
+   
+    new_data = {
+        webdata: {
+            "email": emaildata,
+            "password": passworddata,
+        }
+    }
+
+    if len(webdata) == 0 or len(passworddata) == 0:
+        messagebox.showinfo(title="Oops", message="Please make sure you haven't left any fields empty.")
     else:
-        data=webdata+" | "+emaildata+" | "+passworddata+"\n"
-        is_ok=messagebox.askokcancel(title="website",message=f"These are the details entered: \n {data}")
-        if is_ok:
-            with open("day29\data.txt","a") as f1:
-                f1.write(data)
-            website.delete(0,END)
-            password.delete(0,END)
+        try:
+            with open("day29\data.json", "r") as data_file:
+                #Reading old data
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open("day29\data.json", "w") as data_file:
+                json.dump(new_data, data_file, indent=4)
+        else:
+            #Updating old data with new data
+            data.update(new_data)
+
+            with open("day29\data.json", "w") as data_file:
+                #Saving updated data
+                json.dump(data, data_file, indent=4)
+        finally:
+            website.delete(0, END)
+def find_password():
+    websitedat = website.get()
+    try:
+        with open("day29\data.json") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo(title="Error", message="No Data File Found.")
+    else:
+        if websitedat in data:
+            email = data[websitedat]["email"]
+            password = data[websitedat]["password"]
+            messagebox.showinfo(title=website, message=f"Email: {email}\nPassword: {password}")
+        else:
+            messagebox.showinfo(title="Error", message=f"No details for {website} exists.")       
 # ---------------------------- UI SETUP ------------------------------- #
 window=Tk()
 window.title("Password Manager")
 window.config(padx=50,pady=50)
-
 
 canvas=Canvas(width=200,height=200)
 lock_img=PhotoImage(file="D:\code\python\\100 days of python\day29\logo.png")
@@ -58,9 +91,9 @@ canvas.grid(column=1,row=0)
 
 websitetext=Label(text="Website:")
 websitetext.grid(column=0,row=1)
-website=Entry(width=35)
+website=Entry(width=21)
 website.focus()
-website.grid(column=1,row=1,sticky=(W),columnspan=2)
+website.grid(column=1,row=1,sticky=(W))
 
 emailtext=Label(text="Email/Username:")
 emailtext.grid(column=0,row=2)
@@ -72,6 +105,9 @@ passwordtext=Label(text="Password:")
 passwordtext.grid(column=0,row=3)
 password=Entry(width=21)
 password.grid(column=1,row=3,sticky=(W))
+
+search=Button(text="Search",command=find_password)
+search.grid(column=2,row=1,sticky=(W))
 
 generate=Button(text="Generate Password",command=generatepass)
 generate.grid(column=1,row=3,sticky=(E))
