@@ -18,5 +18,5 @@ print(len(movies))
 with open("day45\Starting Code - 100 movies to watch start\movies.txt", mode="w") as file:
     for movie in movies:
         print(movie)
-        file.write(f"{movie}\n")
+        #file.write(f"{movie}\n")
 
